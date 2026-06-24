@@ -53,3 +53,22 @@ def get_issue_by_id(issue_id: str):
         )
 
     return response.data[0]
+
+def update_issue_status(issue_id: str, status: str):
+    supabase = get_supabase_client()
+
+    response = (
+        supabase
+        .table("issues")
+        .update({"status": status})
+        .eq("id", issue_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Issue not found"
+        )
+
+    return response.data[0]
