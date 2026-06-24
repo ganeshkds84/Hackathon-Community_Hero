@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 
+from app.api.issues import router as issue_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,6 +16,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+app.include_router(issue_router)
 # CORS lets the Next.js frontend (running on port 3000) call this API from the browser.
 app.add_middleware(
     CORSMiddleware,

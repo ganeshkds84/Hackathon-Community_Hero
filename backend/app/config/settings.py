@@ -1,31 +1,34 @@
-"""Application configuration."""
+"""Application configuration (environment variables loaded from `.env`)."""
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from __future__ import annotations
 
+import os
 
-class Settings(BaseSettings):
-    """Load settings from environment variables and .env file."""
+from dotenv import load_dotenv
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        extra="ignore",
-    )
-
-    app_name: str = "Community Hero API"
-    app_env: str = "development"
-    debug: bool = True
-    host: str = "0.0.0.0"
-    port: int = 8000
-    cors_origins: list[str] = ["http://localhost:3000"]
-
-    # Supabase — wired in a later phase
-    supabase_url: str = ""
-    supabase_anon_key: str = ""
-    supabase_service_role_key: str = ""
-
-    # Google Gemini — wired in a later phase
-    gemini_api_key: str = ""
+# Load variables from a local `.env` file into the process environment.
+# This makes `os.getenv("NAME")` work in local development.
+load_dotenv()
 
 
+class Settings:
+    """Simple settings container loaded from environment variables."""
+
+    # General app settings
+    app_name: str = os.getenv("APP_NAME", "Community Hero API")
+    app_env: str = os.getenv("APP_ENV", "development")
+    debug: bool = os.getenv("DEBUG", "true").lower() == "true"
+    host: str = os.getenv("HOST", "0.0.0.0")
+    port: int = int(os.getenv("PORT", "8000"))
+
+    # CORS settings (kept simple for now)
+    cors_origin: str = os.getenv("CORS_ORIGIN", "http://localhost:3000")
+
+    # Supabase settings (required for Supabase client)
+    # Supabase settings
+    supabase_url: str | None = os.getenv("SUPABASE_URL")
+    supabase_anon_key: str | None = os.getenv("SUPABASE_ANON_KEY")
+    supabase_service_role_key: str | None = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+# Create a single settings instance that can be imported anywhere.
 settings = Settings()
