@@ -1,5 +1,6 @@
 from app.database.supabase_client import get_supabase_client
 from app.schemas.issue_schema import IssueCreate
+from fastapi import HTTPException
 
 
 def create_issue(issue: IssueCreate):
@@ -33,3 +34,22 @@ def get_all_issues():
     )
 
     return response.data
+
+def get_issue_by_id(issue_id: str):
+    supabase = get_supabase_client()
+
+    response = (
+        supabase
+        .table("issues")
+        .select("*")
+        .eq("id", issue_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Issue not found"
+        )
+
+    return response.data[0]
