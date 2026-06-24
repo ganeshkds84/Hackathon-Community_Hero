@@ -55,12 +55,13 @@ def get_issue_by_id(issue_id: str):
     return response.data[0]
 
 def update_issue_status(issue_id: str, status: str):
+
     supabase = get_supabase_client()
 
     response = (
         supabase
         .table("issues")
-        .update({"status": status})
+        .select("*")
         .eq("id", issue_id)
         .execute()
     )
@@ -71,4 +72,28 @@ def update_issue_status(issue_id: str, status: str):
             detail="Issue not found"
         )
 
-    return response.data[0]
+    current_issue = response.data[0]
+    old_status = current_issue["status"]
+
+    updated_response = (
+        supabase
+        .table("issues")
+        .update({"status": status})
+        .eq("id", issue_id)
+        .execute()
+    )
+
+    history_data = {
+        "issue_id": issue_id,
+        "old_status": old_status,
+        "new_status": status
+    }
+
+    (
+        supabase
+        .table("status_history")
+        .insert(history_data)
+        .execute()
+    )
+
+    return updated_response.data[0]
