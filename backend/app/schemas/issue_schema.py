@@ -5,6 +5,7 @@ This file does not create any routes in this phase.
 """
 
 from __future__ import annotations
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -42,3 +43,6 @@ class IssueResponse(BaseModel):
         default=None, description="Optional URL of an image associated with the issue."
     )  # Image URL (optional)
 
+class SupportResponse(BaseModel):
+    id: UUID
+    support_count: int

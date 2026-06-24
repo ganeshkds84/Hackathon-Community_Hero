@@ -97,3 +97,49 @@ def update_issue_status(issue_id: str, status: str):
     )
 
     return updated_response.data[0]
+
+def get_issue_history(issue_id: str):
+    supabase = get_supabase_client()
+
+    response = (
+        supabase
+        .table("status_history")
+        .select("*")
+        .eq("issue_id", issue_id)
+        .order("changed_at")
+        .execute()
+    )
+
+    return response.data
+
+def support_issue(issue_id: str):
+    supabase = get_supabase_client()
+    response = (
+        supabase.table("issues")
+        .select("*")
+        .eq("id", issue_id)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    issue = response.data[0]
+    current_support = issue.get("support_count", 0)
+
+    if current_support is None:
+        current_support = 0
+
+    new_support = current_support + 1
+
+    (
+        supabase.table("issues")
+        .update({"support_count": new_support})
+        .eq("id", issue_id)
+        .execute()
+    )
+
+    return {
+        "id": issue_id,
+        "support_count": new_support
+    }

@@ -1,8 +1,11 @@
 from fastapi import APIRouter
 from app.schemas.issue_schema import IssueCreate, IssueResponse
-from app.services.issue_service import create_issue, get_all_issues,get_issue_by_id,update_issue_status
+from app.services.issue_service import create_issue, get_all_issues,get_issue_by_id,update_issue_status,get_issue_history
+from app.services.issue_service import support_issue
 from app.schemas.status_schema import StatusUpdate
 from typing import List 
+from app.schemas.history_schema import HistoryResponse
+from app.schemas.issue_schema import SupportResponse
 
 router = APIRouter(
     prefix="/issues",
@@ -44,3 +47,17 @@ def change_status(
     )
 
     return updated_issue
+
+@router.get(
+    "/{issue_id}/history",
+    response_model=List[HistoryResponse]
+)
+def get_history(issue_id: str):
+
+    history = get_issue_history(issue_id)
+
+    return history
+
+@router.patch("/{issue_id}/support", response_model=SupportResponse)
+def support_issue_route(issue_id: str):
+    return support_issue(issue_id)
