@@ -20,3 +20,16 @@ def create_issue(issue: IssueCreate):
     )
 
     return response.data[0]
+
+def get_all_issues():
+    supabase = get_supabase_client()
+
+    response = (
+        supabase
+        .table("issues")
+        .select("*")
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    return response.data
