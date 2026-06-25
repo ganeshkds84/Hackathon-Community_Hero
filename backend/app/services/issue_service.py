@@ -194,3 +194,22 @@ def get_dashboard_summary():
         "in_progress": in_progress,
         "resolved": resolved,
     }
+
+def get_category_analytics():
+    supabase = get_supabase_client()
+
+    response = (
+        supabase
+        .table("issues")
+        .select("*")
+        .execute()
+    )
+
+    categories = {}
+    for issue in response.data:
+        category = issue.get("category")
+        if category is None:
+            continue
+        categories[category] = categories.get(category, 0) + 1
+
+    return {"categories": categories}

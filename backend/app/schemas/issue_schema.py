@@ -46,3 +46,11 @@ class IssueResponse(BaseModel):
 class SupportResponse(BaseModel):
     id: UUID
     support_count: int
+
+
+class NearbyIssueResponse(BaseModel):
+    id: str
+    title: str
+    category: str | None
+    status: str | None
+    distance_km: float

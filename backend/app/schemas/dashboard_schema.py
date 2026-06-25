@@ -6,3 +6,7 @@ class DashboardSummary(BaseModel):
     reported: int
     in_progress: int
     resolved: int
+
+
+class CategoryAnalytics(BaseModel):
+    categories: dict[str, int]
