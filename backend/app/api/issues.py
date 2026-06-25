@@ -33,14 +33,12 @@ def filter_issues_route(
     status: str | None = None,
     severity: str | None = None
 ):
-    try:
-        return filter_issues(
-            category=category,
-            status=status,
-            severity=severity
-        )
-    except Exception as e:
-        return {"error": str(e)}
+    return filter_issues(
+        category=category,
+        status=status,
+        severity=severity
+    )
+    
 
 @router.get("/{issue_id}", response_model=IssueResponse)
 def get_issue(issue_id: str):

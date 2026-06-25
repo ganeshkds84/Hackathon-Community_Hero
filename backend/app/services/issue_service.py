@@ -151,25 +151,17 @@ def filter_issues(
 ):
     supabase = get_supabase_client()
 
-    try:
-        query = supabase.table("issues").select("*")
+    query = supabase.table("issues").select("*")
 
-        if category:
-            query = query.eq("category", category)
+    if category:
+        query = query.eq("category", category)
 
-        if status:
-            query = query.eq("status", status)
+    if status:
+        query = query.eq("status", status)
 
-        if severity:
-            query = query.eq("severity", severity)
+    if severity:
+        query = query.eq("severity", severity)
 
-        response = query.execute()
+    response = query.execute()
 
-        print("SUCCESS")
-        print(response.data)
-
-        return response.data
-
-    except Exception as e:
-        print("ERROR:", repr(e))
-        raise
+    return response.data
