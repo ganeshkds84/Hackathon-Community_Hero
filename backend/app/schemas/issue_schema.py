@@ -54,3 +54,9 @@ class NearbyIssueResponse(BaseModel):
     category: str | None
     status: str | None
     distance_km: float
+
+
+class DuplicateCheckResponse(BaseModel):
+    possible_duplicate: bool
+    existing_issue_id: str | None
+    message: str
