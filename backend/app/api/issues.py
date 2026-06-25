@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.schemas.issue_schema import IssueCreate, IssueResponse, SupportResponse, NearbyIssueResponse, DuplicateCheckResponse
+from app.schemas.issue_schema import IssueCreate, IssueResponse, SupportResponse, NearbyIssueResponse, DuplicateCheckResponse, IssueReportResponse
 from app.services.issue_service import create_issue, get_all_issues,get_issue_by_id,update_issue_status,get_issue_history
 from app.services.issue_service import support_issue,filter_issues,get_dashboard_summary,get_category_analytics
 from app.services.location_service import get_nearby_issues
@@ -15,12 +15,10 @@ router = APIRouter(
 )
 
 
-@router.post("/report", response_model=IssueResponse)
+@router.post("/report", response_model=IssueReportResponse)
 def report_issue(issue: IssueCreate):
 
-    created_issue = create_issue(issue)
-
-    return created_issue
+    return create_issue(issue)
 
 @router.post("/check-duplicate", response_model=DuplicateCheckResponse)
 def check_duplicate_issue_route(issue: IssueCreate):

@@ -1,10 +1,27 @@
 from app.database.supabase_client import get_supabase_client
 from app.schemas.issue_schema import IssueCreate
 from app.services.classification_service import classify_issue
+from app.services.duplicate_detection_service import check_duplicate_issue
 from fastapi import HTTPException
 
 
 def create_issue(issue: IssueCreate):
+    duplicate_result = check_duplicate_issue(
+        issue.title,
+        issue.description,
+        issue.latitude,
+        issue.longitude,
+    )
+
+    if duplicate_result["possible_duplicate"]:
+        return {
+            "issue_created": False,
+            "possible_duplicate": True,
+            "issue_id": None,
+            "existing_issue_id": duplicate_result["existing_issue_id"],
+            "message": "Similar issue already exists nearby",
+        }
+
     supabase = get_supabase_client()
 
     classification = classify_issue(issue.title, issue.description)
@@ -26,7 +43,13 @@ def create_issue(issue: IssueCreate):
         .execute()
     )
 
-    return response.data[0]
+    return {
+        "issue_created": True,
+        "possible_duplicate": False,
+        "issue_id": response.data[0]["id"],
+        "existing_issue_id": None,
+        "message": "Issue reported successfully",
+    }
 
 def get_all_issues():
     supabase = get_supabase_client()

@@ -60,3 +60,11 @@ class DuplicateCheckResponse(BaseModel):
     possible_duplicate: bool
     existing_issue_id: str | None
     message: str
+
+
+class IssueReportResponse(BaseModel):
+    issue_created: bool
+    possible_duplicate: bool
+    message: str
+    issue_id: str | None
+    existing_issue_id: str | None
