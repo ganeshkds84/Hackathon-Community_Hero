@@ -1,16 +1,22 @@
 from app.database.supabase_client import get_supabase_client
 from app.schemas.issue_schema import IssueCreate
+from app.services.classification_service import classify_issue
 from fastapi import HTTPException
 
 
 def create_issue(issue: IssueCreate):
     supabase = get_supabase_client()
 
+    classification = classify_issue(issue.title, issue.description)
+
     data = {
         "title": issue.title,
         "description": issue.description,
         "latitude": issue.latitude,
         "longitude": issue.longitude,
+        "category": classification["category"],
+        "severity": classification["severity"],
+        "department": classification["department"],
     }
 
     response = (
