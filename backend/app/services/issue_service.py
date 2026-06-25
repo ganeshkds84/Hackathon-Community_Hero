@@ -143,3 +143,33 @@ def support_issue(issue_id: str):
         "id": issue_id,
         "support_count": new_support
     }
+
+def filter_issues(
+    category: str | None = None,
+    status: str | None = None,
+    severity: str | None = None
+):
+    supabase = get_supabase_client()
+
+    try:
+        query = supabase.table("issues").select("*")
+
+        if category:
+            query = query.eq("category", category)
+
+        if status:
+            query = query.eq("status", status)
+
+        if severity:
+            query = query.eq("severity", severity)
+
+        response = query.execute()
+
+        print("SUCCESS")
+        print(response.data)
+
+        return response.data
+
+    except Exception as e:
+        print("ERROR:", repr(e))
+        raise
