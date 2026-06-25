@@ -165,3 +165,26 @@ def filter_issues(
     response = query.execute()
 
     return response.data
+
+def get_dashboard_summary():
+    supabase = get_supabase_client()
+
+    response = (
+        supabase
+        .table("issues")
+        .select("*")
+        .execute()
+    )
+
+    issues = response.data
+    total_issues = len(issues)
+    reported = sum(1 for issue in issues if issue.get("status") == "Reported")
+    in_progress = sum(1 for issue in issues if issue.get("status") == "In Progress")
+    resolved = sum(1 for issue in issues if issue.get("status") == "Resolved")
+
+    return {
+        "total_issues": total_issues,
+        "reported": reported,
+        "in_progress": in_progress,
+        "resolved": resolved,
+    }

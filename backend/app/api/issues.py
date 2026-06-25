@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from app.schemas.issue_schema import IssueCreate, IssueResponse
 from app.services.issue_service import create_issue, get_all_issues,get_issue_by_id,update_issue_status,get_issue_history
-from app.services.issue_service import support_issue,filter_issues
+from app.services.issue_service import support_issue,filter_issues,get_dashboard_summary
+from app.schemas.dashboard_schema import DashboardSummary
 from app.schemas.status_schema import StatusUpdate
 from typing import List 
 from app.schemas.history_schema import HistoryResponse
@@ -38,7 +39,10 @@ def filter_issues_route(
         status=status,
         severity=severity
     )
-    
+
+@router.get("/dashboard/summary", response_model=DashboardSummary)
+def get_dashboard_summary_route():
+    return get_dashboard_summary()
 
 @router.get("/{issue_id}", response_model=IssueResponse)
 def get_issue(issue_id: str):
