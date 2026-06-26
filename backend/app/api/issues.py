@@ -1,14 +1,16 @@
 from fastapi import APIRouter
-from app.schemas.issue_schema import IssueCreate, IssueResponse, SupportResponse, NearbyIssueResponse, DuplicateCheckResponse, IssueReportResponse
+from app.schemas.issue_schema import IssueCreate, IssueResponse, SupportResponse, NearbyIssueResponse, DuplicateCheckResponse, IssueReportResponse, IssueAnalysisResponse
 from app.services.issue_service import create_issue, get_all_issues,get_issue_by_id,update_issue_status,get_issue_history
 from app.services.issue_service import support_issue,filter_issues,get_dashboard_summary,get_category_analytics
 from app.services.location_service import get_nearby_issues
 from app.services.duplicate_detection_service import check_duplicate_issue
 from app.services.department_service import get_issues_by_department
+from app.services.gemini_service import generate_issue_analysis
 from app.schemas.dashboard_schema import DashboardSummary, CategoryAnalytics
 from app.schemas.status_schema import StatusUpdate
 from typing import List 
 from app.schemas.history_schema import HistoryResponse
+
 
 router = APIRouter(
     prefix="/issues",
@@ -29,6 +31,10 @@ def check_duplicate_issue_route(issue: IssueCreate):
         issue.latitude,
         issue.longitude,
     )
+
+@router.post("/analyze", response_model=IssueAnalysisResponse)
+def analyze_issue_route(issue: IssueCreate):
+    return generate_issue_analysis(issue.title, issue.description)
 
 @router.get("", response_model=List[IssueResponse])
 def get_issues():

@@ -30,5 +30,8 @@ class Settings:
     supabase_anon_key: str | None = os.getenv("SUPABASE_ANON_KEY")
     supabase_service_role_key: str | None = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
+    # Google Gemini settings
+    gemini_api_key: str | None = os.getenv("GEMINI_API_KEY")
+
 # Create a single settings instance that can be imported anywhere.
 settings = Settings()

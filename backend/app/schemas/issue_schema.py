@@ -68,3 +68,7 @@ class IssueReportResponse(BaseModel):
     message: str
     issue_id: str | None
     existing_issue_id: str | None
+
+
+class IssueAnalysisResponse(BaseModel):
+    analysis: str
