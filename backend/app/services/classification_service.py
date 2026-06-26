@@ -8,13 +8,6 @@ def classify_issue(title: str, description: str):
             "department": "Water Department",
         }
 
-    if any(keyword in text for keyword in ("pothole", "road")):
-        return {
-            "category": "Road",
-            "severity": "High",
-            "department": "Roads Department",
-        }
-
     if any(keyword in text for keyword in ("streetlight", "light")):
         return {
             "category": "Streetlight",
@@ -27,6 +20,13 @@ def classify_issue(title: str, description: str):
             "category": "Waste",
             "severity": "Low",
             "department": "Sanitation Department",
+        }
+
+    if any(keyword in text for keyword in ("pothole", "road")):
+        return {
+            "category": "Road",
+            "severity": "High",
+            "department": "Roads Department",
         }
 
     return {

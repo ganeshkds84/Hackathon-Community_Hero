@@ -4,6 +4,7 @@ from app.services.issue_service import create_issue, get_all_issues,get_issue_by
 from app.services.issue_service import support_issue,filter_issues,get_dashboard_summary,get_category_analytics
 from app.services.location_service import get_nearby_issues
 from app.services.duplicate_detection_service import check_duplicate_issue
+from app.services.department_service import get_issues_by_department
 from app.schemas.dashboard_schema import DashboardSummary, CategoryAnalytics
 from app.schemas.status_schema import StatusUpdate
 from typing import List 
@@ -63,6 +64,10 @@ def get_nearby_issues_route(
     radius_km: float = 5,
 ):
     return get_nearby_issues(latitude, longitude, radius_km)
+
+@router.get("/department/{department_name}", response_model=List[IssueResponse])
+def get_department_issues_route(department_name: str):
+    return get_issues_by_department(department_name)
 
 @router.get("/{issue_id}", response_model=IssueResponse)
 def get_issue(issue_id: str):
