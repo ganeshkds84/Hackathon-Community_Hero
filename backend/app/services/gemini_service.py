@@ -1,10 +1,12 @@
 import os
+import traceback
 
-import google.generativeai as genai
+from google import genai
 
 from app.config.settings import settings
 
 FALLBACK_ANALYSIS = "AI analysis unavailable."
+GEMINI_MODEL = "gemini-2.0-flash"
 
 
 def generate_issue_analysis(title: str, description: str) -> dict[str, str]:
@@ -31,15 +33,21 @@ Issue Description: {description}
 Keep the full response brief and easy for municipal staff to read."""
 
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(prompt)
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+        )
 
-        analysis = (response.text or "").strip()
+        analysis = ""
+
+        if hasattr(response, "text") and response.text:
+            analysis = response.text.strip()
         if not analysis:
             return {"analysis": FALLBACK_ANALYSIS}
 
         return {"analysis": analysis}
     except Exception as e:
         print(f"Gemini Error: {e}")
+        traceback.print_exc()
         return {"analysis": FALLBACK_ANALYSIS}
