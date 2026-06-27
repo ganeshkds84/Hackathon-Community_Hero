@@ -1,6 +1,7 @@
 """FastAPI application entry point."""
 
 from app.api.issues import router as issue_router
+from app.api.upload import router as upload_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -17,6 +18,7 @@ app = FastAPI(
 )
 
 app.include_router(issue_router)
+app.include_router(upload_router)
 # CORS lets the Next.js frontend (running on port 3000) call this API from the browser.
 app.add_middleware(
     CORSMiddleware,
