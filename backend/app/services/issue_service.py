@@ -34,6 +34,7 @@ def create_issue(issue: IssueCreate):
         "category": classification["category"],
         "severity": classification["severity"],
         "department": classification["department"],
+        "image_url": issue.image_url,
     }
 
     response = (

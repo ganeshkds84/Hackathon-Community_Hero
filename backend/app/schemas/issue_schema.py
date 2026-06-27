@@ -19,6 +19,9 @@ class IssueCreate(BaseModel):
     )  # Issue details
     latitude: float = Field(..., description="Latitude where the issue is located.")  # Map latitude
     longitude: float = Field(..., description="Longitude where the issue is located.")  # Map longitude
+    image_url: str | None = Field(
+        default=None, description="Optional URL of an uploaded image for this issue."
+    )
 
 
 class IssueResponse(BaseModel):
