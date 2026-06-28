@@ -16,6 +16,20 @@ export interface IssueReportResponse {
   existing_issue_id: string | null;
 }
 
+export interface Issue {
+  id: string;
+  title: string;
+  description: string;
+  category: string | null;
+  severity: string | null;
+  status: string;
+  department: string | null;
+  latitude: number;
+  longitude: number;
+  image_url: string | null;
+  created_at: string;
+}
+
 export const issueService = {
   /**
    * Submits a civic issue report to the backend.
@@ -24,6 +38,15 @@ export const issueService = {
    */
   async reportIssue(payload: ReportIssuePayload): Promise<IssueReportResponse> {
     const response = await api.post<IssueReportResponse>("/issues/report", payload);
+    return response.data;
+  },
+
+  /**
+   * Fetches all issues from the backend.
+   * @returns A list of issues.
+   */
+  async getIssues(): Promise<Issue[]> {
+    const response = await api.get<Issue[]>("/issues");
     return response.data;
   },
 };
