@@ -7,10 +7,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { ClipboardList, Upload, MapPin, CheckCircle2, Image as ImageIcon } from "lucide-react"
+import { ClipboardList, Upload, MapPin, CheckCircle2, Image as ImageIcon, Loader2 } from "lucide-react"
 import { useForm, Controller } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
+import { api } from "@/services/api"
 
 const reportIssueSchema = z.object({
   category: z.string().min(1, "Please select a category."),
@@ -22,23 +24,105 @@ const reportIssueSchema = z.object({
     .string()
     .min(20, "Description must be at least 20 characters.")
     .max(1000, "Description cannot exceed 1000 characters."),
+  image_url: z.string().optional(),
 })
 
 type ReportIssueForm = z.infer<typeof reportIssueSchema>
 
 export default function ReportIssuePage() {
-  const { register, handleSubmit, control, formState: { errors } } = useForm<ReportIssueForm>({
+  const [isUploading, setIsUploading] = useState(false)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<ReportIssueForm>({
     resolver: zodResolver(reportIssueSchema),
     defaultValues: {
       category: "",
       title: "",
       description: "",
+      image_url: "",
     },
   })
+
+  const imageUrl = watch("image_url")
 
   const onSubmit = (data: ReportIssueForm) => {
     console.log(data)
   }
+
+  const validateFile = (file: File) => {
+    const allowedExtensions = ["jpg", "jpeg", "png", "webp"];
+    const fileExtension = file.name.split(".").pop()?.toLowerCase();
+    
+    if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
+      return "Invalid file type. Only JPG, JPEG, PNG, and WEBP images are allowed.";
+    }
+
+    const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      return "Invalid file type. Only JPG, JPEG, PNG, and WEBP images are allowed.";
+    }
+
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10 MB
+    if (file.size > maxSizeInBytes) {
+      return "File too large. Maximum size allowed is 10 MB.";
+    }
+
+    return null;
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+
+    // Validate file
+    const errorMsg = validateFile(file);
+    if (errorMsg) {
+      setUploadError(errorMsg);
+      e.target.value = "";
+      return;
+    }
+
+    // Upload file
+    setIsUploading(true);
+    setFileName(file.name);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await api.post<{ image_url: string }>("/upload/image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data && response.data.image_url) {
+        setValue("image_url", response.data.image_url, { shouldValidate: true });
+      } else {
+        setUploadError("Upload failure: Invalid response from server.");
+      }
+    } catch (error: any) {
+      console.error(error);
+      if (error.response) {
+        setUploadError(`Upload failure: ${error.response.data?.detail || "Server error"}`);
+      } else if (error.request) {
+        setUploadError("Network error: Failed to connect to the server. Please check your connection.");
+      } else {
+        setUploadError(`Upload failure: ${error.message || "An unexpected error occurred."}`);
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setValue("image_url", "", { shouldValidate: true });
+    setFileName(null);
+    setUploadError(null);
+  };
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
@@ -150,15 +234,70 @@ export default function ReportIssuePage() {
                   <ImageIcon className="w-5 h-5 text-muted-foreground" />
                   <h3 className="font-semibold text-lg">Image</h3>
                 </div>
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-10 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20">
-                  <div className="bg-background p-3 rounded-full shadow-sm">
-                    <Upload className="w-6 h-6 text-muted-foreground" />
+
+                {isUploading ? (
+                  /* Loading State */
+                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-10 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20 animate-pulse">
+                    <div className="bg-background p-3 rounded-full shadow-sm">
+                      <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">Uploading image...</p>
+                      <p className="text-xs text-muted-foreground">Please wait</p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Image upload coming soon</p>
-                    <p className="text-xs text-muted-foreground">Supports JPG, PNG, WEBP</p>
+                ) : imageUrl ? (
+                  /* Success / Preview State */
+                  <div className="relative border border-border rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4 bg-muted/10">
+                    <div className="relative w-24 h-24 rounded-lg overflow-hidden border bg-muted flex-shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imageUrl} alt="Uploaded issue preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0 text-center sm:text-left space-y-1">
+                      <p className="text-sm font-medium truncate">{fileName || "uploaded-image.jpg"}</p>
+                      <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-emerald-600 dark:text-emerald-500 font-medium">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Upload successful</span>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveImage}
+                      className="w-full sm:w-auto text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    >
+                      Remove
+                    </Button>
                   </div>
-                </div>
+                ) : (
+                  /* Upload Input Area */
+                  <div className="relative border-2 border-dashed border-muted-foreground/25 rounded-xl p-10 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20 hover:bg-muted/30 transition cursor-pointer">
+                    <input
+                      type="file"
+                      id="image-upload"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      onChange={handleFileChange}
+                      disabled={isUploading}
+                    />
+                    <div className="bg-background p-3 rounded-full shadow-sm">
+                      <Upload className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Click to upload an image</p>
+                      <p className="text-xs text-muted-foreground">Supports JPG, JPEG, PNG, WEBP (Max 10MB)</p>
+                    </div>
+                  </div>
+                )}
+
+                {uploadError && (
+                  <p className="text-sm font-medium text-destructive mt-2">
+                    {uploadError}
+                  </p>
+                )}
+
+                <input type="hidden" {...register("image_url")} />
               </div>
 
               {/* Submit Button */}
