@@ -45,6 +45,12 @@ class IssueResponse(BaseModel):
     image_url: str | None = Field(
         default=None, description="Optional URL of an image associated with the issue."
     )  # Image URL (optional)
+    created_at: str | None = Field(
+        default=None, description="Timestamp when the issue was created."
+    )
+    support_count: int | None = Field(
+        default=0, description="Number of community supports/upvotes."
+    )
 
 class SupportResponse(BaseModel):
     id: UUID
