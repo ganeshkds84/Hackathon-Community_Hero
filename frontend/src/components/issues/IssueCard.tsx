@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
 import { Calendar, Tag, AlertCircle } from "lucide-react"
 import { Issue } from "@/services/issue.service"
+import Link from "next/link"
 
 interface IssueCardProps {
   issue: Issue
@@ -38,7 +39,8 @@ export function IssueCard({ issue }: IssueCardProps) {
   }
 
   return (
-    <Card className="flex flex-col h-full overflow-hidden hover:shadow-md transition-shadow duration-200 rounded-2xl border-border/60">
+    <Link href={`/issues/${issue.id}`} className="block h-full">
+      <Card className="flex flex-col h-full overflow-hidden hover:shadow-md transition-shadow duration-200 rounded-2xl border-border/60 cursor-pointer">
       {issue.image_url ? (
         <div className="relative w-full h-48 overflow-hidden bg-muted border-b">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -79,5 +81,6 @@ export function IssueCard({ issue }: IssueCardProps) {
         </div>
       </CardFooter>
     </Card>
+  </Link>
   )
 }

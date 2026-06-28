@@ -28,6 +28,7 @@ export interface Issue {
   longitude: number;
   image_url: string | null;
   created_at: string;
+  support_count?: number;
 }
 
 export const issueService = {
@@ -49,4 +50,29 @@ export const issueService = {
     const response = await api.get<Issue[]>("/issues");
     return response.data;
   },
+
+  /**
+   * Fetches a single issue by ID from the backend.
+   * @param issueId The issue ID.
+   * @returns The issue details.
+   */
+  async getIssueById(issueId: string): Promise<Issue> {
+    const response = await api.get<Issue>(`/issues/${issueId}`);
+    return response.data;
+  },
+
+  /**
+   * Upvotes/supports a community issue.
+   * @param issueId The issue ID.
+   * @returns The support count and status.
+   */
+  async supportIssue(issueId: string): Promise<SupportResponse> {
+    const response = await api.patch<SupportResponse>(`/issues/${issueId}/support`);
+    return response.data;
+  },
 };
+
+export interface SupportResponse {
+  id: string;
+  support_count: number;
+}
