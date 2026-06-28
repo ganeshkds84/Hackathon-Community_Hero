@@ -1,3 +1,5 @@
+"use client"
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -6,8 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ClipboardList, Upload, MapPin, CheckCircle2, Image as ImageIcon } from "lucide-react"
+import { useForm, Controller } from "react-hook-form"
+
+type ReportIssueForm = {
+  category: string
+  title: string
+  description: string
+}
 
 export default function ReportIssuePage() {
+  const { register, handleSubmit, control } = useForm<ReportIssueForm>({
+    defaultValues: {
+      category: "",
+      title: "",
+      description: "",
+    },
+  })
+
+  const onSubmit = (data: ReportIssueForm) => {
+    console.log(data)
+  }
+
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
       {/* Header Section */}
@@ -30,90 +51,97 @@ export default function ReportIssuePage() {
               Please provide as much information as possible.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            
-            {/* Issue Category */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Issue Category</Label>
-              <Select>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="road">Road</SelectItem>
-                  <SelectItem value="water">Water</SelectItem>
-                  <SelectItem value="streetlight">Streetlight</SelectItem>
-                  <SelectItem value="waste">Waste</SelectItem>
-                  <SelectItem value="general">General</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Issue Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Issue Title</Label>
-              <Input id="title" placeholder="Brief summary of the issue" />
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea 
-                id="description" 
-                placeholder="Provide a detailed description of the issue..." 
-                className="min-h-[120px]"
-              />
-            </div>
-
-            <Separator />
-
-            {/* Location Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-muted-foreground" />
-                <h3 className="font-semibold text-lg">Location</h3>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Issue Category */}
+              <div className="space-y-2">
+                <Label htmlFor="category">Issue Category</Label>
+                <Controller
+                  name="category"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="road">Road</SelectItem>
+                        <SelectItem value="water">Water</SelectItem>
+                        <SelectItem value="streetlight">Streetlight</SelectItem>
+                        <SelectItem value="waste">Waste</SelectItem>
+                        <SelectItem value="general">General</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude</Label>
-                  <Input id="latitude" disabled placeholder="e.g. 37.7749" />
+
+              {/* Issue Title */}
+              <div className="space-y-2">
+                <Label htmlFor="title">Issue Title</Label>
+                <Input id="title" placeholder="Brief summary of the issue" {...register("title")} />
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  placeholder="Provide a detailed description of the issue..." 
+                  className="min-h-[120px]"
+                  {...register("description")}
+                />
+              </div>
+
+              <Separator />
+
+              {/* Location Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-muted-foreground" />
+                  <h3 className="font-semibold text-lg">Location</h3>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude</Label>
-                  <Input id="longitude" disabled placeholder="e.g. -122.4194" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="latitude">Latitude</Label>
+                    <Input id="latitude" disabled placeholder="e.g. 37.7749" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="longitude">Longitude</Label>
+                    <Input id="longitude" disabled placeholder="e.g. -122.4194" />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Location picker will be added in a later milestone.
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Image Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                  <h3 className="font-semibold text-lg">Image</h3>
+                </div>
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-10 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20">
+                  <div className="bg-background p-3 rounded-full shadow-sm">
+                    <Upload className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Image upload coming soon</p>
+                    <p className="text-xs text-muted-foreground">Supports JPG, PNG, WEBP</p>
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Location picker will be added in a later milestone.
-              </p>
-            </div>
 
-            <Separator />
-
-            {/* Image Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                <h3 className="font-semibold text-lg">Image</h3>
+              {/* Submit Button */}
+              <div className="pt-4">
+                <Button type="submit" className="w-full h-12 text-lg rounded-xl">
+                  Submit Report
+                </Button>
               </div>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-10 flex flex-col items-center justify-center text-center space-y-3 bg-muted/20">
-                <div className="bg-background p-3 rounded-full shadow-sm">
-                  <Upload className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Image upload coming soon</p>
-                  <p className="text-xs text-muted-foreground">Supports JPG, PNG, WEBP</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <Button disabled className="w-full h-12 text-lg rounded-xl">
-                Submit Report
-              </Button>
-            </div>
-            
+            </form>
           </CardContent>
         </Card>
         
@@ -155,3 +183,4 @@ export default function ReportIssuePage() {
     </div>
   )
 }
+
