@@ -52,6 +52,16 @@ export const issueService = {
   },
 
   /**
+   * Fetches issues matching the given filter parameters from the backend.
+   * @param params An object with optional category and status.
+   * @returns A list of filtered issues.
+   */
+  async getFilteredIssues(params: { category?: string; status?: string }): Promise<Issue[]> {
+    const response = await api.get<Issue[]>("/issues/filter", { params });
+    return response.data;
+  },
+
+  /**
    * Fetches a single issue by ID from the backend.
    * @param issueId The issue ID.
    * @returns The issue details.
