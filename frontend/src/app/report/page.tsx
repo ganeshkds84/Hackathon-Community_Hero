@@ -12,7 +12,8 @@ import { useForm, Controller } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
-import { api } from "@/services/api"
+import { uploadService } from "@/services/upload.service"
+import { issueService, ReportIssuePayload } from "@/services/issue.service"
 
 const reportIssueSchema = z.object({
   category: z.string().min(1, "Please select a category."),
@@ -33,8 +34,11 @@ export default function ReportIssuePage() {
   const [isUploading, setIsUploading] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<ReportIssueForm>({
+  const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<ReportIssueForm>({
     resolver: zodResolver(reportIssueSchema),
     defaultValues: {
       category: "",
@@ -46,8 +50,49 @@ export default function ReportIssuePage() {
 
   const imageUrl = watch("image_url")
 
-  const onSubmit = (data: ReportIssueForm) => {
-    console.log(data)
+  const handleRemoveImage = () => {
+    setValue("image_url", "", { shouldValidate: true });
+    setFileName(null);
+    setUploadError(null);
+  };
+
+  const onSubmit = async (data: ReportIssueForm) => {
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+    setErrorMessage(null)
+
+    try {
+      const payload: ReportIssuePayload = {
+        title: data.title,
+        description: data.description,
+        latitude: 37.7749,
+        longitude: -122.4194,
+        image_url: data.image_url || null,
+      }
+
+      const result = await issueService.reportIssue(payload)
+
+      if (result.issue_created) {
+        setSubmitStatus("success")
+        reset()
+        handleRemoveImage()
+      } else {
+        setSubmitStatus("error")
+        setErrorMessage(result.message)
+      }
+    } catch (error: any) {
+      console.error(error)
+      setSubmitStatus("error")
+      if (error.response) {
+        setErrorMessage(error.response.data?.detail || "Server validation error. Please check your input.")
+      } else if (error.request) {
+        setErrorMessage("Network error: Failed to connect to the server.")
+      } else {
+        setErrorMessage(error.message || "An unexpected error occurred.")
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const validateFile = (file: File) => {
@@ -90,20 +135,8 @@ export default function ReportIssuePage() {
     setFileName(file.name);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await api.post<{ image_url: string }>("/upload/image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.data && response.data.image_url) {
-        setValue("image_url", response.data.image_url, { shouldValidate: true });
-      } else {
-        setUploadError("Upload failure: Invalid response from server.");
-      }
+      const uploadedUrl = await uploadService.uploadImage(file);
+      setValue("image_url", uploadedUrl, { shouldValidate: true });
     } catch (error: any) {
       console.error(error);
       if (error.response) {
@@ -116,12 +149,6 @@ export default function ReportIssuePage() {
     } finally {
       setIsUploading(false);
     }
-  };
-
-  const handleRemoveImage = () => {
-    setValue("image_url", "", { shouldValidate: true });
-    setFileName(null);
-    setUploadError(null);
   };
 
   return (
@@ -148,6 +175,16 @@ export default function ReportIssuePage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {submitStatus === "success" && (
+                <div className="p-4 text-sm text-emerald-800 bg-emerald-50 rounded-lg dark:bg-emerald-950/30 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-900/50">
+                  Issue reported successfully!
+                </div>
+              )}
+              {submitStatus === "error" && (
+                <div className="p-4 text-sm text-destructive bg-destructive/10 rounded-lg border border-destructive/20">
+                  {errorMessage || "Failed to report issue. Please try again."}
+                </div>
+              )}
               {/* Issue Category */}
               <div className="space-y-2">
                 <Label htmlFor="category">Issue Category</Label>
@@ -302,8 +339,19 @@ export default function ReportIssuePage() {
 
               {/* Submit Button */}
               <div className="pt-4">
-                <Button type="submit" className="w-full h-12 text-lg rounded-xl">
-                  Submit Report
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || isUploading}
+                  className="w-full h-12 text-lg rounded-xl flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <span>Submit Report</span>
+                  )}
                 </Button>
               </div>
             </form>
