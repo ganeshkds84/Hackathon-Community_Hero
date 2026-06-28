@@ -9,15 +9,26 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ClipboardList, Upload, MapPin, CheckCircle2, Image as ImageIcon } from "lucide-react"
 import { useForm, Controller } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
-type ReportIssueForm = {
-  category: string
-  title: string
-  description: string
-}
+const reportIssueSchema = z.object({
+  category: z.string().min(1, "Please select a category."),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters.")
+    .max(100, "Title cannot exceed 100 characters."),
+  description: z
+    .string()
+    .min(20, "Description must be at least 20 characters.")
+    .max(1000, "Description cannot exceed 1000 characters."),
+})
+
+type ReportIssueForm = z.infer<typeof reportIssueSchema>
 
 export default function ReportIssuePage() {
-  const { register, handleSubmit, control } = useForm<ReportIssueForm>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<ReportIssueForm>({
+    resolver: zodResolver(reportIssueSchema),
     defaultValues: {
       category: "",
       title: "",
@@ -74,12 +85,22 @@ export default function ReportIssuePage() {
                     </Select>
                   )}
                 />
+                {errors.category && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.category.message}
+                  </p>
+                )}
               </div>
 
               {/* Issue Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">Issue Title</Label>
                 <Input id="title" placeholder="Brief summary of the issue" {...register("title")} />
+                {errors.title && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.title.message}
+                  </p>
+                )}
               </div>
 
               {/* Description */}
@@ -91,6 +112,11 @@ export default function ReportIssuePage() {
                   className="min-h-[120px]"
                   {...register("description")}
                 />
+                {errors.description && (
+                  <p className="text-sm font-medium text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
 
               <Separator />
@@ -183,4 +209,3 @@ export default function ReportIssuePage() {
     </div>
   )
 }
-
