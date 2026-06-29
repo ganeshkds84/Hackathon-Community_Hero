@@ -5,6 +5,7 @@ from app.services.issue_service import support_issue,filter_issues,get_dashboard
 from app.services.location_service import get_nearby_issues
 from app.services.duplicate_detection_service import check_duplicate_issue
 from app.services.department_service import get_issues_by_department
+from app.services.classification_service import classify_issue
 from app.services.gemini_service import generate_issue_analysis
 from app.schemas.dashboard_schema import DashboardSummary, CategoryAnalytics
 from app.schemas.status_schema import StatusUpdate
@@ -34,7 +35,15 @@ def check_duplicate_issue_route(issue: IssueCreate):
 
 @router.post("/analyze", response_model=IssueAnalysisResponse)
 def analyze_issue_route(issue: IssueCreate):
-    return generate_issue_analysis(issue.title, issue.description)
+    analysis_data = generate_issue_analysis(issue.title, issue.description)
+    classification = classify_issue(issue.title, issue.description)
+    return {
+        "analysis": analysis_data["analysis"],
+        "category": classification["category"],
+        "severity": classification["severity"],
+        "department": classification["department"]
+    }
+
 
 @router.get("", response_model=List[IssueResponse])
 def get_issues():

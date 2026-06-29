@@ -32,6 +32,8 @@ class Settings:
 
     # Google Gemini settings
     gemini_api_key: str | None = os.getenv("GEMINI_API_KEY")
+    gemini_model: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 # Create a single settings instance that can be imported anywhere.
 settings = Settings()
+

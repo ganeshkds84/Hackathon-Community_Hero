@@ -89,3 +89,7 @@ class IssueReportResponse(BaseModel):
 
 class IssueAnalysisResponse(BaseModel):
     analysis: str
+    category: str | None = None
+    severity: str | None = None
+    department: str | None = None
+

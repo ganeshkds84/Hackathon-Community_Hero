@@ -6,7 +6,6 @@ from google import genai
 from app.config.settings import settings
 
 FALLBACK_ANALYSIS = "AI analysis unavailable."
-GEMINI_MODEL = "gemini-2.0-flash"
 
 
 def generate_issue_analysis(title: str, description: str) -> dict[str, str]:
@@ -35,7 +34,7 @@ Keep the full response brief and easy for municipal staff to read."""
     try:
         client = genai.Client(api_key=api_key)
         response = client.models.generate_content(
-            model=GEMINI_MODEL,
+            model=settings.gemini_model,
             contents=prompt,
         )
 

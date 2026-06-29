@@ -114,6 +114,20 @@ export const issueService = {
     const response = await api.get<CategoryAnalytics>("/issues/dashboard/categories");
     return response.data;
   },
+
+  /**
+   * Sends issue details to the backend to get AI analysis.
+   */
+  async analyzeIssue(payload: { title: string; description: string }): Promise<IssueAnalysisResponse> {
+    const response = await api.post<IssueAnalysisResponse>("/issues/analyze", {
+      title: payload.title,
+      description: payload.description,
+      latitude: 0.0,
+      longitude: 0.0,
+      image_url: null,
+    });
+    return response.data;
+  },
 };
 
 export interface SupportResponse {
@@ -131,4 +145,12 @@ export interface DashboardSummary {
 export interface CategoryAnalytics {
   categories: Record<string, number>;
 }
+
+export interface IssueAnalysisResponse {
+  analysis: string;
+  category: string | null;
+  severity: string | null;
+  department: string | null;
+}
+
 
