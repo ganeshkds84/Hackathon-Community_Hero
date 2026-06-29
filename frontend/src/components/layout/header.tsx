@@ -11,9 +11,18 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
-          <span className="text-muted-foreground">Report</span>
-          <span className="text-muted-foreground">Issues</span>
-          <span className="text-muted-foreground">Dashboard</span>
+          <Link href="/report" className="text-muted-foreground hover:text-foreground transition-colors">
+            Report
+          </Link>
+          <Link href="/issues" className="text-muted-foreground hover:text-foreground transition-colors">
+            Issues
+          </Link>
+          <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
+            Dashboard
+          </Link>
+          <Link href="/ai" className="text-muted-foreground hover:text-foreground transition-colors">
+            AI Analyzer
+          </Link>
         </nav>
       </div>
     </header>
