@@ -98,9 +98,37 @@ export const issueService = {
     });
     return response.data;
   },
+
+  /**
+   * Fetches the dashboard overview summary data from the backend.
+   */
+  async getDashboardSummary(): Promise<DashboardSummary> {
+    const response = await api.get<DashboardSummary>("/issues/dashboard/summary");
+    return response.data;
+  },
+
+  /**
+   * Fetches the dashboard category analytics data from the backend.
+   */
+  async getDashboardCategories(): Promise<CategoryAnalytics> {
+    const response = await api.get<CategoryAnalytics>("/issues/dashboard/categories");
+    return response.data;
+  },
 };
 
 export interface SupportResponse {
   id: string;
   support_count: number;
 }
+
+export interface DashboardSummary {
+  total_issues: number;
+  reported: number;
+  in_progress: number;
+  resolved: number;
+}
+
+export interface CategoryAnalytics {
+  categories: Record<string, number>;
+}
+
