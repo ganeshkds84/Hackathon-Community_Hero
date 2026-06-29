@@ -60,8 +60,16 @@ class SupportResponse(BaseModel):
 class NearbyIssueResponse(BaseModel):
     id: str
     title: str
+    description: str
     category: str | None
-    status: str | None
+    severity: str | None
+    status: str
+    department: str | None
+    latitude: float
+    longitude: float
+    image_url: str | None
+    created_at: str | None
+    support_count: int | None
     distance_km: float
 
 

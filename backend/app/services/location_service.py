@@ -42,8 +42,16 @@ def get_nearby_issues(latitude: float, longitude: float, radius_km: float):
             nearby.append({
                 "id": issue["id"],
                 "title": issue["title"],
+                "description": issue.get("description", ""),
                 "category": issue.get("category"),
+                "severity": issue.get("severity"),
                 "status": issue.get("status"),
+                "department": issue.get("department"),
+                "latitude": issue_lat,
+                "longitude": issue_lon,
+                "image_url": issue.get("image_url"),
+                "created_at": issue.get("created_at"),
+                "support_count": issue.get("support_count", 0),
                 "distance_km": distance,
             })
 
