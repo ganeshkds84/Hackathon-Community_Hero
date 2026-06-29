@@ -80,6 +80,24 @@ export const issueService = {
     const response = await api.patch<SupportResponse>(`/issues/${issueId}/support`);
     return response.data;
   },
+
+  /**
+   * Fetches nearby issues from the backend based on latitude, longitude, and radius (in meters).
+   * @param latitude
+   * @param longitude
+   * @param radiusMeters
+   * @returns A list of nearby issues.
+   */
+  async getNearbyIssues(latitude: number, longitude: number, radiusMeters: number): Promise<Issue[]> {
+    const response = await api.get<Issue[]>("/issues/nearby", {
+      params: {
+        latitude,
+        longitude,
+        radius_km: radiusMeters / 1000,
+      },
+    });
+    return response.data;
+  },
 };
 
 export interface SupportResponse {
