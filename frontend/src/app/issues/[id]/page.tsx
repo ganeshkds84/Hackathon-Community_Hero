@@ -80,12 +80,12 @@ export default function IssueDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  const getStatusLabel = (status: string) => {
-    return status.replace("_", " ")
+  const getStatusLabel = (status?: string) => {
+    return (status || "").replace("_", " ")
   }
 
-  const getStatusClass = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusClass = (status?: string) => {
+    switch ((status || "").toLowerCase()) {
       case "pending":
         return "bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/50"
       case "in_progress":

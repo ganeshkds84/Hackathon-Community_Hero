@@ -1,0 +1,31 @@
+# Ignore local environment variables and secrets
+.env
+.env.example
+
+# Ignore Python cache and build artifacts
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Ignore virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore local system and editor config files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

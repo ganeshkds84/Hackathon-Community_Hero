@@ -64,16 +64,18 @@ function IssuesList() {
         status: statusParam,
       })
 
+      const issuesList = Array.isArray(data) ? data : []
+
       const query = searchQ.trim().toLowerCase()
       if (query) {
-        const filtered = data.filter(
+        const filtered = issuesList.filter(
           (issue) =>
             issue.title.toLowerCase().includes(query) ||
             issue.description.toLowerCase().includes(query)
         )
         setIssues(filtered)
       } else {
-        setIssues(data)
+        setIssues(issuesList)
       }
     } catch (err: any) {
       console.error(err)
